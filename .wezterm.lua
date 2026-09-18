@@ -6,7 +6,7 @@ local inherited_path = os.getenv('PATH') or ''
 config.set_environment_variables = {
   PATH = '/opt/homebrew/bin:/usr/local/bin:' .. inherited_path,
 }
-config.default_prog = { 'tmux', 'new-session', '-A', '-s', 'main' }
+config.default_prog = { 'tmux', 'new-session' }
 
 -- JetBrains Mono Nerd Font supplies the prompt glyphs and keeps code readable.
 config.font = wezterm.font_with_fallback({
