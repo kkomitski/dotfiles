@@ -23,10 +23,12 @@ if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
 
-casks=(wezterm visual-studio-code font-jetbrains-mono-nerd-font)
-for cask in "${casks[@]}"; do
-  brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
-done
+if command -v code >/dev/null 2>&1 || [[ -d "/Applications/Visual Studio Code.app" ]]; then
+  printf 'VS Code is available.\n'
+else
+  brew list --cask visual-studio-code >/dev/null 2>&1 || brew install --cask visual-studio-code
+fi
+
 
 # Install the tmux plugins referenced by .tmux.conf without requiring TPM at runtime.
 tmux_plugins="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins}"
