@@ -27,7 +27,7 @@
                 },
                 "to": [
                   {
-                    "shell_command": "osascript -e 'tell application \"System Events\" to keystroke \"#\"'"
+                    "shell_command": "printf '#' | pbcopy; osascript -e 'tell application \"System Events\" to keystroke \"v\" using {command down}'"
                   }
                 ]
               }
