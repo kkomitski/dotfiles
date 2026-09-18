@@ -38,7 +38,7 @@ done
 if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
-casks=(wezterm font-jetbrains-mono-nerd-font)
+casks=(aerospace wezterm font-jetbrains-mono-nerd-font)
 for cask in "${casks[@]}"; do
   brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
 done
@@ -95,5 +95,6 @@ link_config "$repo_root/.wezterm.lua" "$HOME/.wezterm.lua"
 link_config "$repo_root/.config/starship.toml" "$HOME/.config/starship.toml"
 link_config "$repo_root/.config/nvim" "$HOME/.config/nvim"
 link_config "$repo_root/.config/yazi" "$HOME/.config/yazi"
+link_config "$repo_root/.config/aerospace/aerospace.toml" "$HOME/.aerospace.toml"
 
 printf 'Dependencies installed and dotfiles linked from %s.\n' "$repo_root"
