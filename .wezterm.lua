@@ -2,6 +2,7 @@ local wezterm = require 'wezterm'
 
 local config = wezterm.config_builder()
 config.automatically_reload_config = true
+config.send_composed_key_when_left_alt_is_pressed = true
 local inherited_path = os.getenv('PATH') or ''
 config.set_environment_variables = {
   PATH = '/opt/homebrew/bin:/usr/local/bin:' .. inherited_path,
