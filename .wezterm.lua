@@ -2,7 +2,7 @@ local wezterm = require 'wezterm'
 
 local config = wezterm.config_builder()
 config.automatically_reload_config = true
-config.send_composed_key_when_left_alt_is_pressed = true
+config.send_composed_key_when_left_alt_is_pressed = false
 local inherited_path = os.getenv('PATH') or ''
 config.set_environment_variables = {
   PATH = '/opt/homebrew/bin:/usr/local/bin:' .. inherited_path,
@@ -120,6 +120,7 @@ config.keys = {
   { key = 't', mods = 'CMD', action = wezterm.action.SendString('\002') },
   { key = 'b', mods = 'CMD', action = wezterm.action.SendString('\002b') },
   { key = 'p', mods = 'CMD', action = wezterm.action.SendKey { key = 'p', mods = 'CTRL' } },
+  { key = '3', mods = 'ALT', action = wezterm.action.SendString('#') },
   { key = 'P', mods = 'CMD', action = wezterm.action.SendKey { key = 'p', mods = 'CTRL|SHIFT' } },
   { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
 }
