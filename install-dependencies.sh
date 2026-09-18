@@ -44,6 +44,11 @@ if command -v code >/dev/null 2>&1 || [[ -d "/Applications/Visual Studio Code.ap
 else
   brew list --cask visual-studio-code >/dev/null 2>&1 || brew install --cask visual-studio-code
 fi
+if command -v code >/dev/null 2>&1 && [[ -f "$repo_root/vscode/extensions.txt" ]]; then
+  while IFS= read -r extension; do
+    [[ -z "$extension" ]] || code --install-extension "$extension" --force >/dev/null
+  done < "$repo_root/vscode/extensions.txt"
+fi
 
 
 # Install the tmux plugins referenced by .tmux.conf without requiring TPM at runtime.
