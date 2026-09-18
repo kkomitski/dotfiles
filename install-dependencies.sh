@@ -38,6 +38,10 @@ done
 if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
+casks=(wezterm font-jetbrains-mono-nerd-font)
+for cask in "${casks[@]}"; do
+  brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
+done
 export NVM_DIR="$HOME/.nvm"
 source "$(brew --prefix nvm)/nvm.sh"
 nvm install --lts
