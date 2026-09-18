@@ -109,10 +109,9 @@ config.mouse_bindings = {
   {
     event = { Up = { streak = 1, button = 'Left' } },
     mods = 'SHIFT',
-    action = wezterm.action.CompleteSelection,
+    action = wezterm.action.CompleteSelection 'Clipboard',
   },
 }
-
 
 config.keys = {
   { key = 'c', mods = 'CMD', action = wezterm.action.CopyTo 'Clipboard' },
