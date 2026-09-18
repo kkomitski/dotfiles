@@ -104,7 +104,7 @@ config.keys = {
   { key = 'b', mods = 'CMD', action = wezterm.action.SendString('\002b') },
   { key = 'p', mods = 'CMD', action = wezterm.action.SendKey { key = 'p', mods = 'CTRL' } },
   { key = 'P', mods = 'CMD', action = wezterm.action.SendKey { key = 'p', mods = 'CTRL|SHIFT' } },
-  { key = 'w', mods = 'CMD', action = wezterm.action.SendString('\002x') },
+  { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
 }
 
 for index = 1, 5 do
