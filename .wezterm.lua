@@ -95,6 +95,23 @@ config.scrollback_lines = 10000
 config.audible_bell = 'Disabled'
 config.warn_about_missing_glyphs = false
 
+config.mouse_bindings = {
+  {
+    event = { Down = { streak = 1, button = 'Left' } },
+    mods = 'SHIFT',
+    action = wezterm.action.SelectTextAtMouseCursor 'Cell',
+  },
+  {
+    event = { Drag = { streak = 1, button = 'Left' } },
+    mods = 'SHIFT',
+    action = wezterm.action.ExtendSelectionToMouseCursor 'Cell',
+  },
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'SHIFT',
+    action = wezterm.action.CompleteSelection,
+  },
+}
 
 
 config.keys = {
