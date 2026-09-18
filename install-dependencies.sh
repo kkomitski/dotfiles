@@ -40,7 +40,11 @@ if ((${#missing[@]})); then
 fi
 casks=(aerospace karabiner-elements wezterm font-jetbrains-mono-nerd-font)
 for cask in "${casks[@]}"; do
-  brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
+  if [[ "$cask" == "karabiner-elements" ]] && [[ ! -d "/Applications/Karabiner-Elements.app" ]]; then
+    brew reinstall --cask "$cask"
+  elif ! brew list --cask "$cask" >/dev/null 2>&1; then
+    brew install --cask "$cask"
+  fi
 done
 export NVM_DIR="$HOME/.nvm"
 source "$(brew --prefix nvm)/nvm.sh"
