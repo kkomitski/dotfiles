@@ -1,0 +1,96 @@
+# Modern two-line prompt with subtle Catppuccin colors and Nerd Font glyphs.
+palette = "catppuccin_mocha"
+add_newline = false
+command_timeout = 1000
+scan_timeout = 30
+
+format = """
+[╭─](overlay0) $directory $git_branch$git_status$fill$nodejs$python$java$golang$rust$docker_context$cmd_duration$status
+[╰─](overlay0) $character """
+
+[palettes.catppuccin_mocha]
+base = "#1e1e2e"
+surface0 = "#313244"
+overlay0 = "#6c7086"
+text = "#cdd6f4"
+blue = "#89b4fa"
+lavender = "#b4befe"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+red = "#f38ba8"
+mauve = "#cba6f7"
+
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[directory]
+style = "bold blue"
+format = "[󰉋 $path]($style)[$read_only]($read_only_style)"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " 󰌾"
+read_only_style = "bold red"
+
+[git_branch]
+symbol = " "
+style = "bold lavender"
+format = "[$symbol$branch]($style)"
+
+[git_status]
+style = "bold red"
+format = " [$all_status$ahead_behind]($style)"
+
+[fill]
+symbol = "─"
+style = "dimmed overlay0"
+
+[nodejs]
+symbol = " "
+style = "bold green"
+format = "[$symbol$version]($style) "
+
+[python]
+symbol = " "
+style = "bold yellow"
+format = "[$symbol$version]($style) "
+
+[java]
+symbol = " "
+style = "bold red"
+format = "[$symbol$version]($style) "
+
+[golang]
+symbol = " "
+style = "bold blue"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = " "
+style = "bold red"
+format = "[$symbol$version]($style) "
+
+[docker_context]
+symbol = " "
+style = "bold blue"
+format = "[$symbol$context]($style) "
+
+[kubernetes]
+disabled = true
+
+[cmd_duration]
+min_time = 2000
+style = "bold yellow"
+format = "[󱎫 $duration]($style) "
+
+[status]
+disabled = false
+style = "bold red"
+format = "[✗ $status]($style) "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold blue)"

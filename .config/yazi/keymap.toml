@@ -1,0 +1,9 @@
+[[mgr.prepend_keymap]]
+on = [ "o", "n" ]
+run = 'shell --block "nvim -- %h"'
+desc = "Open hovered item in Neovim"
+
+[[mgr.prepend_keymap]]
+on = [ "o", "v" ]
+run = 'shell --block "code --wait -- %h"'
+desc = "Open hovered item in VS Code"
