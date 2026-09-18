@@ -38,13 +38,9 @@ done
 if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
-casks=(aerospace karabiner-elements wezterm font-jetbrains-mono-nerd-font)
+casks=(aerospace wezterm font-jetbrains-mono-nerd-font)
 for cask in "${casks[@]}"; do
-  if [[ "$cask" == "karabiner-elements" ]] && [[ ! -d "/Applications/Karabiner-Elements.app" ]]; then
-    brew reinstall --cask "$cask"
-  elif ! brew list --cask "$cask" >/dev/null 2>&1; then
-    brew install --cask "$cask"
-  fi
+  brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
 done
 export NVM_DIR="$HOME/.nvm"
 source "$(brew --prefix nvm)/nvm.sh"
@@ -99,7 +95,6 @@ link_config "$repo_root/.wezterm.lua" "$HOME/.wezterm.lua"
 link_config "$repo_root/.config/starship.toml" "$HOME/.config/starship.toml"
 link_config "$repo_root/.config/nvim" "$HOME/.config/nvim"
 link_config "$repo_root/.config/yazi" "$HOME/.config/yazi"
-link_config "$repo_root/.config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
 link_config "$repo_root/.aerospace.toml" "$HOME/.aerospace.toml"
 
 printf 'Dependencies installed and dotfiles linked from %s.\n' "$repo_root"
