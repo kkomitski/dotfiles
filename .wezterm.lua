@@ -2,7 +2,7 @@ local wezterm = require 'wezterm'
 
 local config = wezterm.config_builder()
 config.automatically_reload_config = true
-config.default_prog = { '/opt/homebrew/bin/tmux', 'new-session', '-A', '-s', 'main' }
+config.default_prog = { 'tmux', 'new-session', '-A', '-s', 'main' }
 
 -- JetBrains Mono Nerd Font supplies the prompt glyphs and keeps code readable.
 config.font = wezterm.font_with_fallback({

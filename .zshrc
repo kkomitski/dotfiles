@@ -25,7 +25,7 @@ export WINEARCH=win64
 
 export PNPM_HOME="$HOME/Library/pnpm"
 typeset -U path PATH
-path=("$PNPM_HOME/bin" "/Users/kkomitski/Code/butler" $path)
+path=("$PNPM_HOME/bin" "$HOME/Code/butler" $path)
 
 export OLLAMA_API_KEY=ollama-local
 
@@ -120,6 +120,6 @@ alias g='git'
 rehash
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/kkomitski/.lmstudio/bin"
+export PATH="$PATH:$HOME/.lmstudio/bin"
 # End of LM Studio CLI section
 
