@@ -2,6 +2,10 @@ local wezterm = require 'wezterm'
 
 local config = wezterm.config_builder()
 config.automatically_reload_config = true
+local inherited_path = os.getenv('PATH') or ''
+config.set_environment_variables = {
+  PATH = '/opt/homebrew/bin:/usr/local/bin:' .. inherited_path,
+}
 config.default_prog = { 'tmux', 'new-session', '-A', '-s', 'main' }
 
 -- JetBrains Mono Nerd Font supplies the prompt glyphs and keeps code readable.
