@@ -14,6 +14,10 @@ export PATH="$HOME/.jenv/bin:$PATH"
 if (( $+commands[jenv] )); then
   eval "$(jenv init -)"
 fi
+if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  source "$HOMEBREW_PREFIX/opt/nvm/nvm.sh"
+fi
 export PATH="$PATH:$GO_HOME/bin:$POPCORN_HOME/bin:$ASPROF_HOME/bin:$PYTHON_USER_BIN"
 
 export BUN_INSTALL="$HOME/.bun"

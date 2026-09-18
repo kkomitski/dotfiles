@@ -25,7 +25,7 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 formulas=(
-  starship neovim yazi tmux zoxide fzf fzf-tab eza bat
+  bun nvm starship neovim yazi tmux zoxide fzf fzf-tab eza bat
   zsh-autosuggestions zsh-history-substring-search zsh-autopair
   zsh-syntax-highlighting
 )
@@ -38,15 +38,25 @@ done
 if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
+export NVM_DIR="$HOME/.nvm"
+source "$(brew --prefix nvm)/nvm.sh"
+nvm install --lts
+nvm alias default 'lts/*'
+if ! command -v omp >/dev/null 2>&1; then
+  bun add --global @oh-my-pi/pi-coding-agent
+fi
 
 if command -v code >/dev/null 2>&1 || [[ -d "/Applications/Visual Studio Code.app" ]]; then
   printf 'VS Code is available.\n'
 else
   brew list --cask visual-studio-code >/dev/null 2>&1 || brew install --cask visual-studio-code
 fi
+
 if command -v code >/dev/null 2>&1 && [[ -f "$repo_root/vscode/extensions.txt" ]]; then
   while IFS= read -r extension; do
-    [[ -z "$extension" ]] || code --install-extension "$extension" --force >/dev/null
+    if [[ -n "$extension" ]] && ! code --install-extension "$extension" --force >/dev/null; then
+      printf 'Warning: could not install VS Code extension %s\n' "$extension" >&2
+    fi
   done < "$repo_root/vscode/extensions.txt"
 fi
 

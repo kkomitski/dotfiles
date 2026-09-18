@@ -23,7 +23,6 @@ ms-vscode.test-adapter-converter
 ms-vsliveshare.vsliveshare
 openai.chatgpt
 oven.bun-vscode
-popcorn.popcorn-highlight
 redhat.vscode-yaml
 seatonjiang.gitmoji-vscode
 timonwong.shellcheck
