@@ -1,12 +1,17 @@
 [[mgr.prepend_keymap]]
 on = [ "o", "n" ]
 run = 'shell --block "nvim -- %h"'
-desc = "Open hovered item in Neovim"
+desc = "Open in Neovim"
 
 [[mgr.prepend_keymap]]
 on = [ "o", "v" ]
 run = 'shell --block "code --wait -- %h"'
-desc = "Open hovered item in VS Code"
+desc = "Open in VSCode"
+
+[[mgr.prepend_keymap]]
+on = [ "o", "c" ]
+run = [ 'shell --block -- if [ -d "%h" ]; then target="%h"; else target="$(dirname -- "%h")"; fi; ya emit cd -- "$target"', "quit" ]
+desc = "Open in CLI"
 
 [[mgr.prepend_keymap]]
 on = "F"

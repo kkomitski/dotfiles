@@ -99,6 +99,20 @@ if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -r "$HOMEBREW_PREFIX/opt/zsh-syntax-highlig
 fi
 fi
 
+# Return to the directory selected in Yazi when it exits.
+yazi() {
+  local cwd_file cwd status
+  cwd_file="$(mktemp -t yazi-cwd.XXXXXX)" || return
+  command yazi "$@" --cwd-file="$cwd_file"
+  status=$?
+  if [[ -s "$cwd_file" ]]; then
+    IFS= read -r cwd < "$cwd_file"
+    [[ -d "$cwd" ]] && builtin cd -- "$cwd"
+  fi
+  rm -f -- "$cwd_file"
+  return "$status"
+}
+
 echo_path() {
   echo "$PATH" | tr ':' '\n'
 }
