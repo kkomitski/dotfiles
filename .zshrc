@@ -101,16 +101,16 @@ fi
 
 # Return to the directory selected in Yazi when it exits.
 yazi() {
-  local cwd_file cwd status
+  local cwd_file cwd exit_status
   cwd_file="$(mktemp -t yazi-cwd.XXXXXX)" || return
   command yazi "$@" --cwd-file="$cwd_file"
-  status=$?
+  exit_status=$?
   if [[ -s "$cwd_file" ]]; then
     IFS= read -r cwd < "$cwd_file"
     [[ -d "$cwd" ]] && builtin cd -- "$cwd"
   fi
   rm -f -- "$cwd_file"
-  return "$status"
+  return "$exit_status"
 }
 
 
