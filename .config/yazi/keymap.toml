@@ -7,3 +7,8 @@ desc = "Open hovered item in Neovim"
 on = [ "o", "v" ]
 run = 'shell --block "code --wait -- %h"'
 desc = "Open hovered item in VS Code"
+
+[[mgr.prepend_keymap]]
+on = "F"
+run = 'shell --block -- selected="$(fd --type d --hidden --exclude .git . | fzf --height=80% --layout=reverse --border=rounded --prompt="Directory> ")" && [ -n "$selected" ] && ya emit cd -- "$selected"'
+desc = "Fuzzy-find directories below the current one"

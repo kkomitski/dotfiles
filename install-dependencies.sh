@@ -25,7 +25,7 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 formulas=(
-  bun nvm starship neovim yazi tmux zoxide fzf fzf-tab eza bat
+  bun nvm starship neovim yazi tmux zoxide fzf fd fzf-tab eza bat
   zsh-autosuggestions zsh-history-substring-search zsh-autopair
   zsh-syntax-highlighting
 )
