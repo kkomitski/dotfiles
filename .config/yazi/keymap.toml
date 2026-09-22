@@ -12,8 +12,3 @@ desc = "Open in VSCode"
 on = [ "o", "t" ]
 run = 'shell --orphan -- if [ -d "%h" ]; then target="%h"; else target="$(dirname -- "%h")"; fi; ya emit cd -- "$target"; ya emit quit'
 desc = "Open in Terminal"
-
-[[mgr.prepend_keymap]]
-on = "F"
-run = 'shell --block -- selected="$(fd --type d --hidden --exclude .git . | fzf --height=80% --layout=reverse --border=rounded --prompt="Directory> ")" && [ -n "$selected" ] && ya emit cd -- "$selected"'
-desc = "Fuzzy-find directories below the current one"
