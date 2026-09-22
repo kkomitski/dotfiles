@@ -1,7 +1,7 @@
 # Homebrew is the source for Starship and the Zsh integrations below.
 if (( $+commands[brew] )); then
   HOMEBREW_PREFIX="$(brew --prefix)"
-  fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)
+  fpath=("$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
 fi
 
 # Environment and tool paths.

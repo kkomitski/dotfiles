@@ -38,7 +38,7 @@ done
 if ((${#missing[@]})); then
   brew install "${missing[@]}"
 fi
-casks=(aerospace wezterm font-jetbrains-mono-nerd-font)
+casks=(nikitabobko/tap/aerospace wezterm font-jetbrains-mono-nerd-font)
 for cask in "${casks[@]}"; do
   brew list --cask "$cask" >/dev/null 2>&1 || brew install --cask "$cask"
 done
