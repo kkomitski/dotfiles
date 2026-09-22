@@ -123,6 +123,7 @@ config.keys = {
   { key = '3', mods = 'ALT', action = wezterm.action.SendString('#') },
   { key = 'P', mods = 'CMD', action = wezterm.action.SendKey { key = 'p', mods = 'CTRL|SHIFT' } },
   { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
+  { key = 'f', mods = 'SHIFT', action = wezterm.action.SendString('F') },
 }
 
 for index = 1, 5 do

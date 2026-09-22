@@ -113,6 +113,17 @@ yazi() {
   return "$status"
 }
 
+# Shift+F opens the same fuzzy directory picker from an interactive shell.
+fuzzy-directory-widget() {
+  local selected
+  selected="$(fd --type d --hidden --exclude .git . | fzf --height=80% --layout=reverse --border=rounded --prompt='Directory> ')" || return
+  [[ -n "$selected" ]] && builtin cd -- "$selected"
+  zle reset-prompt
+}
+zle -N fuzzy-directory-widget
+bindkey -M emacs 'F' fuzzy-directory-widget
+bindkey -M viins 'F' fuzzy-directory-widget
+
 echo_path() {
   echo "$PATH" | tr ':' '\n'
 }
