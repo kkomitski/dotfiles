@@ -73,11 +73,18 @@ if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
 fi
 
-# Up opens the fuzzy history search; down keeps prefix/substr history navigation.
+# Up opens the fuzzy history search; down fuzzy-finds a directory below $PWD.
+fuzzy-directory-widget() {
+  local selected
+  selected="$(fd --type d --hidden --exclude .git . | fzf --height=80% --layout=reverse --border=rounded --prompt='Directory> ')" || return
+  [[ -n "$selected" ]] && builtin cd -- "$selected"
+  zle reset-prompt
+}
+zle -N fuzzy-directory-widget
 bindkey '^[[A' fzf-history-widget
 bindkey '^[OA' fzf-history-widget
-bindkey '^[[B' history-substring-search-down
-bindkey '^[OB' history-substring-search-down
+bindkey '^[[B' fuzzy-directory-widget
+bindkey '^[OB' fuzzy-directory-widget
 bindkey -r '^R'
 
 ZSH_AUTOSUGGEST_STRATEGY=(history)
