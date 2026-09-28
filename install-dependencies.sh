@@ -46,8 +46,14 @@ export NVM_DIR="$HOME/.nvm"
 source "$(brew --prefix nvm)/nvm.sh"
 nvm install --lts
 nvm alias default 'lts/*'
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 if ! command -v omp >/dev/null 2>&1; then
   bun add --global @oh-my-pi/pi-coding-agent
+fi
+if ! command -v omp >/dev/null 2>&1; then
+  printf 'Installed pi-coding-agent, but omp is still not available on PATH (%s/bin).\n' "$BUN_INSTALL" >&2
+  exit 1
 fi
 
 if command -v code >/dev/null 2>&1 || [[ -d "/Applications/Visual Studio Code.app" ]]; then
@@ -58,8 +64,11 @@ fi
 
 if command -v code >/dev/null 2>&1 && [[ -f "$repo_root/vscode/extensions.txt" ]]; then
   while IFS= read -r extension; do
-    if [[ -n "$extension" ]] && ! code --install-extension "$extension" --force >/dev/null; then
-      printf 'Warning: could not install VS Code extension %s\n' "$extension" >&2
+    if [[ -n "$extension" ]]; then
+      printf 'Installing VS Code extension %s...\n' "$extension"
+      if ! code --install-extension "$extension" --force; then
+        printf 'Warning: could not install VS Code extension %s\n' "$extension" >&2
+      fi
     fi
   done < "$repo_root/vscode/extensions.txt"
 fi
