@@ -101,6 +101,8 @@ link_config() {
 link_config "$repo_root/.zshrc" "$HOME/.zshrc"
 link_config "$repo_root/.tmux.conf" "$HOME/.tmux.conf"
 link_config "$repo_root/.wezterm.lua" "$HOME/.wezterm.lua"
+# Both search locations must resolve to the same config across WezTerm releases.
+link_config "$repo_root/.wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
 link_config "$repo_root/.config/starship.toml" "$HOME/.config/starship.toml"
 link_config "$repo_root/.config/nvim" "$HOME/.config/nvim"
 link_config "$repo_root/.config/yazi" "$HOME/.config/yazi"

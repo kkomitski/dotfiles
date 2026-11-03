@@ -74,8 +74,9 @@ config.colors = {
   },
 }
 
-config.window_background_opacity = 0.94
-config.macos_window_background_blur = 18
+-- Opaque baseline avoids background compositing while diagnosing redraw flicker.
+config.window_background_opacity = 1.0
+config.macos_window_background_blur = 0
 config.window_padding = {
   left = 16,
   right = 16,
@@ -115,6 +116,11 @@ config.mouse_bindings = {
 }
 
 config.keys = {
+  -- Translate macOS navigation to keys understood by terminal text editors.
+  { key = 'LeftArrow', mods = 'ALT', action = wezterm.action.SendKey { key = 'b', mods = 'ALT' } },
+  { key = 'RightArrow', mods = 'ALT', action = wezterm.action.SendKey { key = 'f', mods = 'ALT' } },
+  { key = 'LeftArrow', mods = 'CMD', action = wezterm.action.SendKey { key = 'Home' } },
+  { key = 'RightArrow', mods = 'CMD', action = wezterm.action.SendKey { key = 'End' } },
   { key = 'c', mods = 'CMD', action = wezterm.action.CopyTo 'Clipboard' },
   { key = 'v', mods = 'CMD', action = wezterm.action.PasteFrom 'Clipboard' },
   { key = 't', mods = 'CMD', action = wezterm.action.SendString('\002') },

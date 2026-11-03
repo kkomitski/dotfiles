@@ -19,6 +19,10 @@ end
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 
+-- WezTerm sends Alt+B/F for Option+Left/Right; keep word motion in Insert mode.
+map("i", "<M-b>", "<C-Left>", { desc = "Move backward one word" })
+map("i", "<M-f>", "<C-Right>", { desc = "Move forward one word" })
+
 -- VSCode file navigation.
 local function find_files()
 	vim.cmd "Telescope find_files"

@@ -87,6 +87,14 @@ bindkey '^[[B' fuzzy-directory-widget
 bindkey '^[OB' fuzzy-directory-widget
 bindkey -r '^R'
 
+# Home/End from WezTerm, directly or re-encoded by tmux.
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[OH' beginning-of-line
+bindkey '^[OF' end-of-line
+bindkey '^[[1~' beginning-of-line
+bindkey '^[[4~' end-of-line
+
 ZSH_AUTOSUGGEST_STRATEGY=(history)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 
