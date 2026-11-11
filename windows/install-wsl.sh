@@ -9,7 +9,7 @@ if [[ ${1:-} == --install-dependencies ]]; then
     sudo apt-get install -y zsh tmux git curl unzip build-essential procps file
   fi
   missing=()
-  for tool in starship nvim yazi zoxide fzf fd eza bat bun node; do
+  for tool in starship nvim yazi zoxide fzf fd eza bat rg bun node; do
     command -v "$tool" >/dev/null || missing+=("$tool")
   done
   plugin_root="$HOME/.local"
@@ -24,7 +24,7 @@ if [[ ${1:-} == --install-dependencies ]]; then
       fi
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     fi
-    brew install starship neovim yazi zoxide fzf fd eza bat oven-sh/bun/bun nvm \
+    brew install zsh tmux starship neovim yazi zoxide fzf fd eza bat ripgrep oven-sh/bun/bun nvm \
       zsh-autosuggestions zsh-history-substring-search zsh-autopair zsh-syntax-highlighting fzf-tab
     export NVM_DIR="$HOME/.nvm"
     mkdir -p "$NVM_DIR"

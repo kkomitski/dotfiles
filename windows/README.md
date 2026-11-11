@@ -17,7 +17,8 @@ cd "$HOME/.local/share/dotfiles"
 
 The dependency option installs missing Windows Terminal, PowerToys and AutoHotkey
 v2 through winget. It installs the WSL shell/tmux prerequisites through apt,
-then the command-line tools and Zsh integrations through Linuxbrew as needed.
+then current Zsh/tmux, ripgrep, the command-line tools and Zsh integrations
+through Linuxbrew as needed.
 Ubuntu package installation may require sudo. Windows app installation follows
 winget's normal permissions and corporate policies. Internet access is required
 for missing dependencies, Nerd Fonts, and Neovim's first plugin installation.
