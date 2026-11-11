@@ -9,7 +9,7 @@ Native Linux/macOS use their existing bindings; `.wezterm.lua` is unchanged.
 | Finding | Result |
 | --- | --- |
 | Ctrl+S could freeze shell output | WSL Zsh disables software flow control; PTY test verifies continued output. This was reproduced, but does not establish the cause of every earlier WezTerm hang. |
-| New tabs could open PowerShell | WSL is the default profile; new-tab actions explicitly target it. |
+| Shell apps were sharing defaults and bindings | Windows Shell and WSL Terminal have separate executables, portable runtimes, settings, defaults, app identities and icons. Native tabs remain PowerShell; WSL tabs remain WSL/tmux. The old Store Terminal overrides are migrated out. |
 | Every terminal attached to `main` | Launcher creates independent tmux sessions. Two real PTY clients against an isolated server verify session and pane independence. |
 | Cmd+W conflicted with Option+Backspace | Terminal closes its pane/tab; AHK sends Meta+Backspace for word deletion instead of Ctrl+W. |
 | Zsh selection lacked clipboard integration | Cmd+A/C/X select/copy/cut ZLE regions. Unicode/multiline clipboard round trip verified against Windows. |
@@ -30,8 +30,11 @@ Native Linux/macOS use their existing bindings; `.wezterm.lua` is unchanged.
   and shortcut-alias preservation, repeat merges, PowerToys remap preservation,
   and backup behavior.
 - The installer completed twice on this configured machine. Installed-state checks
-  passed for the default profile, unique shortcuts, font configuration, embedded
-  icon, separate Start-menu app identity and running AHK instance.
+  passed for independent profiles/settings, unique shortcuts, fonts, both embedded
+  icons, both Start-menu identities and the running AHK instance. Both private
+  terminal processes/windows were opened together; distinct paths, window AppIDs
+  and nonzero window icons were verified. Live PowerShell/WSL child processes and
+  a connected tmux client were verified after correcting distro/user quoting.
 - Native PowerShell syntax checks and headless Neovim WSL configuration checks
   passed. Windows clipboard Unicode/multiline round trip passed while restoring
   the previous text clipboard.
@@ -53,8 +56,8 @@ remain machine-dependent.
   app bindings cannot distinguish them. Host Ctrl+V paste owns that chord.
 - Zsh editing parity does not replace application-specific controls in every TUI.
   Neovim's provided aliases are WSL-only; Yazi and fzf retain their own conventions.
-- Windows Terminal bindings/default profile apply across Terminal profiles;
-  PowerToys/AHK remaps apply across Windows. AHK shell-deletion transport is
+- Each named app has its own bindings/default profile and runtime. PowerToys/AHK
+  remaps still apply across Windows. AHK shell-deletion transport is
   restricted to the dedicated WSL Terminal window title.
 - Backups precede configuration/AHK replacement. JSON merges preserve unrelated
   settings but normalize formatting; original comments remain in backups.

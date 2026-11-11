@@ -11,6 +11,7 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Configuration.ps1')
 . (Join-Path $PSScriptRoot 'Icon.ps1')
+. (Join-Path $PSScriptRoot 'ShellApps.ps1')
 foreach ($value in @($Distro,$WslUser,$WslHome)) {
     if ($value -match '["\r\n]') { throw 'Distro, user and home must not contain quotes or newlines.' }
 }
@@ -32,6 +33,7 @@ $scheme = Read-JsonFile (Join-Path $PSScriptRoot 'terminal\scheme.json')
 $actions = @(Read-JsonFile (Join-Path $PSScriptRoot 'terminal\actions.json'))
 $bindings = @(Read-JsonFile (Join-Path $PSScriptRoot 'terminal\keybindings.json'))
 $keyboard = Read-JsonFile (Join-Path $PSScriptRoot 'powertoys\keyboard.json')
+$runtimeSpec = Read-JsonFile (Join-Path $PSScriptRoot 'terminal\runtime.json')
 function Find-InstalledFile($Candidates) {
     foreach ($candidate in $Candidates) { if (Test-Path -LiteralPath $candidate) { return $candidate } }
     return $null
@@ -110,26 +112,54 @@ foreach ($font in $fontSources) {
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets\terminal.png') -Destination $png -Force
 New-TerminalIcon $png $ico
 
-# Compile locally, embed the icon both as a Windows resource and a managed resource.
-# Never stop WindowsTerminal or tmux during updates; only replace our identity helper.
-Get-Process -Name 'WSL Terminal' -ErrorAction SilentlyContinue | Where-Object {$_.Path -eq $exe} | Stop-Process -Force
-$source = Join-Path $install 'Launcher.cs'
-Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'launcher\Launcher.cs') -Destination $source
-$compilerArgs = '/nologo /target:winexe /platform:x64 /reference:System.Drawing.dll /reference:System.Windows.Forms.dll /win32icon:"{0}" /resource:"{0}",WSLTerminal.Icon /out:"{1}" "{2}"' -f $ico,$exe,$source
-$compilation = Start-Process -FilePath $compiler -ArgumentList $compilerArgs -Wait -PassThru -RedirectStandardOutput (Join-Path $assets 'compiler.log') -RedirectStandardError (Join-Path $assets 'compiler-errors.log')
-if ($compilation.ExitCode -ne 0) { Get-Content (Join-Path $assets 'compiler.log'); throw 'Launcher compilation failed.' }
-$selfCheck = Start-Process -FilePath $exe -ArgumentList '--self-check' -Wait -PassThru
-if ($selfCheck.ExitCode -ne 0) { throw 'Embedded launcher icon verification failed.' }
+# Give each app an independent portable runtime and settings directory.
+$cache = Join-Path $assets 'cache'
+$runtime = Install-PortableRuntime $install $runtimeSpec $cache
+$windowsInstall = Join-Path $localPath 'Programs\Windows Shell'
+$windowsAssets = Join-Path $localPath 'Windows Shell'
+$windowsRuntime = Install-PortableRuntime $windowsInstall $runtimeSpec $cache
+[IO.Directory]::CreateDirectory($windowsAssets) | Out-Null
+$windowsPng = Join-Path $windowsAssets 'Windows Shell.png'
+$windowsIco = Join-Path $windowsAssets 'Windows Shell.ico'
+$powerShellIcon = [Drawing.Icon]::ExtractAssociatedIcon((Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'))
+$powerShellBitmap = $powerShellIcon.ToBitmap()
+$powerShellBitmap.Save($windowsPng,[Drawing.Imaging.ImageFormat]::Png)
+$powerShellBitmap.Dispose(); $powerShellIcon.Dispose()
+New-TerminalIcon $windowsPng $windowsIco
+$launcherSource = Join-Path $PSScriptRoot 'launcher\Launcher.cs'
+$exe = Build-ShellLauncher 'WSL Terminal' $install $assets $ico $compiler $launcherSource ''
+$windowsExe = Build-ShellLauncher 'Windows Shell' $windowsInstall $windowsAssets $windowsIco $compiler $launcherSource 'WINDOWS_SHELL'
 
-$settingsPath = Join-Path $localPath 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+# Migrate the former shared configuration without stopping any open terminal.
+$legacySettingsPath = Join-Path $localPath 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
 $unpackagedSettings = Join-Path $localPath 'Microsoft\Windows Terminal\settings.json'
-if (-not (Test-Path -LiteralPath $settingsPath) -and (Test-Path -LiteralPath $unpackagedSettings)) { $settingsPath = $unpackagedSettings }
-$settings = if (Test-Path -LiteralPath $settingsPath) { Read-JsonFile $settingsPath } else { [pscustomobject]@{} }
-Set-Field $terminalProfile commandline ('C:\Windows\System32\wsl.exe -d "'+$Distro+'" -u "'+$WslUser+'" --cd ~ -- "'+$WslHome+'/.local/bin/WSL Terminal"')
+if (-not (Test-Path $legacySettingsPath) -and (Test-Path $unpackagedSettings)) { $legacySettingsPath = $unpackagedSettings }
+$legacy = if (Test-Path $legacySettingsPath) { Read-JsonFile $legacySettingsPath } else { [pscustomobject]@{} }
+$seed = $legacy | ConvertTo-Json -Depth 100 | ConvertFrom-Json
+$native = Remove-LegacyWslSettings $legacy $terminalProfile $actions
+Set-Field $terminalProfile commandline (New-WslCommandLine $Distro $WslUser $WslHome)
 Set-Field $terminalProfile startingDirectory ('//wsl.localhost/'+$Distro+$WslHome)
 Set-Field $terminalProfile icon $png
-$settings = Merge-TerminalSettings $settings $terminalProfile $scheme $actions $bindings
+$settingsPath = Join-Path $runtime 'settings\settings.json'
+$settings = if (Test-Path $settingsPath) {
+    Merge-TerminalSettings (Read-JsonFile $settingsPath) $terminalProfile $scheme $actions $bindings
+} else { New-PrivateSettings $seed $terminalProfile $scheme $actions $bindings $true }
 Save-BackedUpFile $settingsPath ($settings | ConvertTo-Json -Depth 100) $backups
+
+$windowsProfile = [pscustomobject]@{
+    guid='{61c54bbd-c2c6-5271-96e7-009a87ff44bf}';name='Windows Shell';hidden=$false
+    commandline='%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -NoLogo'
+    startingDirectory='%USERPROFILE%';tabTitle='Windows Shell';suppressApplicationTitle=$true
+    icon=$windowsPng;font=[pscustomobject]@{face='JetBrainsMonoNL NF';size=13};colorScheme='Campbell'
+}
+$windowsActions = @([pscustomobject]@{id='User.WindowsNewTab';name='New Windows shell tab';command=[pscustomobject]@{action='newTab';profile=$windowsProfile.guid}})
+$windowsBindings = @('ctrl+t','alt+t','ctrl+shift+t' | ForEach-Object {[pscustomobject]@{keys=$_;id='User.WindowsNewTab'}}) + @([pscustomobject]@{keys='ctrl+w';id='Terminal.ClosePane'})
+$windowsSettingsPath = Join-Path $windowsRuntime 'settings\settings.json'
+$windowsSettings = if (Test-Path $windowsSettingsPath) {
+    Merge-TerminalSettings (Read-JsonFile $windowsSettingsPath) $windowsProfile $scheme $windowsActions $windowsBindings
+} else { New-PrivateSettings $native $windowsProfile $scheme $windowsActions $windowsBindings $false }
+Save-BackedUpFile $windowsSettingsPath ($windowsSettings | ConvertTo-Json -Depth 100) $backups
+if (Test-Path $legacySettingsPath) { Save-BackedUpFile $legacySettingsPath ($native | ConvertTo-Json -Depth 100) $backups }
 
 $keyboardRoot = Join-Path $localPath 'Microsoft\PowerToys\Keyboard Manager'
 $keyboardSettingsPath = Join-Path $keyboardRoot 'settings.json'
@@ -165,6 +195,13 @@ $shortcutPath = Join-Path $programsPath 'WSL Terminal.lnk'
 Save-Shortcut $shortcutPath $exe '' ($exe+',0')
 $registration = Start-Process -FilePath $exe -ArgumentList ('--register-shortcut "'+$shortcutPath+'"') -Wait -PassThru
 if ($registration.ExitCode -ne 0) { throw 'Start menu app identity registration failed.' }
+$windowsShortcut = Join-Path $programsPath 'Windows Shell.lnk'
+Save-Shortcut $windowsShortcut $windowsExe '' ($windowsExe+',0')
+$windowsRegistration = Start-Process -FilePath $windowsExe -ArgumentList ('--register-shortcut "'+$windowsShortcut+'"') -Wait -PassThru
+if ($windowsRegistration.ExitCode -ne 0) { throw 'Windows Shell app identity registration failed.' }
+$windowsAppPaths = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\Windows Shell.exe'
+New-Item -Path $windowsAppPaths -Force | Out-Null
+Set-Item -Path $windowsAppPaths -Value $windowsExe
 $appPaths = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\WSL Terminal.exe'
 New-Item -Path $appPaths -Force | Out-Null
 Set-Item -Path $appPaths -Value $exe
@@ -173,13 +210,17 @@ Save-Shortcut (Join-Path $startupPath 'WSL Terminal - PowerToys.lnk') $powerToys
 if (-not $NoStart) {
     Start-Process -FilePath $ahkExe -ArgumentList ('"'+$ahkPath+'"')
     if (-not (Get-Process PowerToys -ErrorAction SilentlyContinue)) { Start-Process -FilePath $powerToysExe }
-    if (Get-Process WindowsTerminal -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle -like '*WSL Terminal*'}) {
-        Start-Process -FilePath $exe -ArgumentList '--adopt'
+    foreach ($app in @(
+        [pscustomobject]@{launcher=$exe;backend=(Join-Path $runtime 'WindowsTerminal.exe')},
+        [pscustomobject]@{launcher=$windowsExe;backend=(Join-Path $windowsRuntime 'WindowsTerminal.exe')})) {
+        if (Get-Process WindowsTerminal -ErrorAction SilentlyContinue | Where-Object {$_.Path -eq $app.backend}) {
+            Start-Process -FilePath $app.launcher -ArgumentList '--adopt'
+        }
     }
 }
-$manifest = [pscustomobject]@{distro=$Distro;wslUser=$WslUser;wslHome=$WslHome;settings=$settingsPath;launcher=$exe;ahk=$ahkPath;shortcuts=@($shortcutPath);backups=$backups}
+$manifest = [pscustomobject]@{layoutVersion=2;windowsLauncher=$windowsExe;windowsSettings=$windowsSettingsPath;legacySettings=$legacySettingsPath;distro=$Distro;wslUser=$WslUser;wslHome=$WslHome;settings=$settingsPath;launcher=$exe;ahk=$ahkPath;shortcuts=@($shortcutPath,$windowsShortcut);backups=$backups}
 [IO.File]::WriteAllText((Join-Path $assets 'installation.json'),($manifest | ConvertTo-Json -Depth 10))
 Write-Output ('Installed WSL Terminal for '+$Distro+' / '+$WslUser)
-Write-Output ('Start menu: '+$shortcutPath)
+Write-Output ('Start menu: '+$shortcutPath+' and '+$windowsShortcut)
 Write-Output ('Backups: '+$backups)
-Write-Output 'Open a new WSL Terminal window. Restart PowerToys if its key maps have not refreshed.'
+Write-Output 'Open WSL Terminal or Windows Shell from Start. Existing windows keep their running sessions.'

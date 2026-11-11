@@ -8,22 +8,34 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+#if WINDOWS_SHELL
+[assembly: System.Reflection.AssemblyTitle("Windows Shell")]
+[assembly: System.Reflection.AssemblyProduct("Windows Shell")]
+#else
 [assembly: System.Reflection.AssemblyTitle("WSL Terminal")]
 [assembly: System.Reflection.AssemblyProduct("WSL Terminal")]
-[assembly: System.Reflection.AssemblyDescription("Ubuntu WSL terminal launcher with a separate Windows app identity")]
+#endif
+[assembly: System.Reflection.AssemblyDescription("Independent terminal launcher with a private settings store")]
 [assembly: System.Reflection.AssemblyVersion("1.0.0.0")]
 
-namespace WslTerminalLauncher
+namespace ShellAppLauncher
 {
     internal static class Program
     {
+#if WINDOWS_SHELL
+        const string AppId = "Local.WindowsShell";
+        const string DisplayName = "Windows Shell";
+#else
         const string AppId = "Local.WSLTerminal";
+        const string DisplayName = "WSL Terminal";
+#endif
         static readonly string Local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        static readonly string Assets = Path.Combine(Local, "WSL Terminal");
+        static readonly string Assets = Path.Combine(Local, DisplayName);
         static readonly string LogPath = Path.Combine(Assets, "launcher.log");
         static readonly Guid PropertyGuid = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
         static readonly Guid StoreGuid = new Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99");
         static readonly string Executable = Process.GetCurrentProcess().MainModule.FileName;
+        static readonly string Backend = Path.Combine(Path.GetDirectoryName(Executable), "runtime", "WindowsTerminal.exe");
 
         [STAThread]
         static int Main(string[] args)
@@ -66,18 +78,18 @@ namespace WslTerminalLauncher
                         }
                         finally { Marshal.ReleaseComObject(store); }
                     }
-                    if (report.Length == 0) throw new InvalidOperationException("No WSL Terminal window was found.");
+                    if (report.Length == 0) throw new InvalidOperationException("No " + DisplayName + " window was found.");
                     File.WriteAllText(args[1], report.ToString());
                     return 0;
                 }
                 bool first;
-                using (var mutex = new Mutex(true, "Local\\WSLTerminal.Identity", out first))
+                using (var mutex = new Mutex(true, "Local\\" + AppId + ".Identity", out first))
                 {
                     try
                     {
                         if (!(args.Length == 1 && args[0] == "--adopt")) Process.Start(new ProcessStartInfo {
-                            FileName = Path.Combine(Local, "Microsoft", "WindowsApps", "wt.exe"),
-                            Arguments = "-w \"WSL Terminal\" new-tab -p \"WSL Terminal\"",
+                            FileName = Backend,
+                            Arguments = "-w \"" + DisplayName + "\" new-tab -p \"" + DisplayName + "\"",
                             WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Windows),
                             UseShellExecute = true
                         });
@@ -91,7 +103,7 @@ namespace WslTerminalLauncher
             catch (Exception error)
             {
                 Log(error.ToString());
-                if (args.Length == 0) MessageBox.Show(error.Message, "WSL Terminal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (args.Length == 0) MessageBox.Show(error.Message, DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 1;
             }
         }
@@ -112,9 +124,9 @@ namespace WslTerminalLauncher
                         try
                         {
                             SetIdentity(store);
-                            if (ReadString(store, 5) != AppId) throw new InvalidOperationException("Windows rejected the WSL Terminal app identity.");
+                            if (ReadString(store, 5) != AppId) throw new InvalidOperationException("Windows rejected the " + DisplayName + " app identity.");
                             known.Add(window);
-                            Log("Assigned WSL Terminal identity to window " + window);
+                            Log("Assigned " + DisplayName + " identity to window " + window);
                         }
                         finally { Marshal.ReleaseComObject(store); }
                     }
@@ -132,7 +144,7 @@ namespace WslTerminalLauncher
 
         static Icon LoadIcon(int size)
         {
-            using (Stream stream = typeof(Program).Assembly.GetManifestResourceStream("WSLTerminal.Icon"))
+            using (Stream stream = typeof(Program).Assembly.GetManifestResourceStream("ShellLauncher.Icon"))
             {
                 if (stream == null) throw new InvalidOperationException("The embedded Terminal icon resource is missing.");
                 using (var icon = new Icon(stream, size, size)) return (Icon)icon.Clone();
@@ -152,15 +164,17 @@ namespace WslTerminalLauncher
                 if (!IsWindowVisible(window)) return true;
                 var title = new StringBuilder(1024);
                 GetWindowText(window, title, title.Capacity);
-                if (title.ToString().IndexOf("WSL Terminal", StringComparison.Ordinal) < 0) return true;
+                if (title.ToString().IndexOf(DisplayName, StringComparison.Ordinal) < 0) return true;
                 uint pid;
                 GetWindowThreadProcessId(window, out pid);
                 try
                 {
                     using (var process = Process.GetProcessById((int)pid))
-                        if (process.ProcessName.Equals("WindowsTerminal", StringComparison.OrdinalIgnoreCase)) result.Add(window);
+                        if (process.ProcessName.Equals("WindowsTerminal", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(process.MainModule.FileName, Backend, StringComparison.OrdinalIgnoreCase)) result.Add(window);
                 }
                 catch (ArgumentException) { }
+                catch (System.ComponentModel.Win32Exception) { }
                 return true;
             }, IntPtr.Zero);
             return result;
@@ -177,7 +191,7 @@ namespace WslTerminalLauncher
         {
             SetString(store, 2, "\"" + Executable + "\"");
             SetString(store, 3, Executable + ",0");
-            SetString(store, 4, "WSL Terminal");
+            SetString(store, 4, DisplayName);
             SetString(store, 5, AppId);
         }
         static void SetString(IPropertyStore store, uint id, string text)

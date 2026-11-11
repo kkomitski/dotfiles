@@ -97,3 +97,41 @@ function Save-BackedUpFile([string]$Path, [string]$Content, [string]$BackupDirec
     [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($Path)) | Out-Null
     [IO.File]::WriteAllText($Path, $Content, (New-Object Text.UTF8Encoding ([bool]$Bom)))
 }
+
+# Undo only the previous installer's WSL entries in the Store Terminal settings.
+function Remove-LegacyWslSettings($Settings,$TerminalProfile,$Actions) {
+    $managedIds = @($Actions | ForEach-Object {$_.id})
+    if ($Settings.PSObject.Properties['profiles'] -and $Settings.profiles.PSObject.Properties['list']) {
+        $Settings.profiles.list = @($Settings.profiles.list | Where-Object {$_.guid -ne $TerminalProfile.guid})
+    }
+    if ($Settings.PSObject.Properties['defaultProfile'] -and $Settings.defaultProfile -eq $TerminalProfile.guid) {
+        $Settings.defaultProfile = '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}'
+    }
+    if ($Settings.PSObject.Properties['actions']) {
+        $Settings.actions = @($Settings.actions | Where-Object {(-not $_.PSObject.Properties['id']) -or $_.id -notin $managedIds})
+    }
+    if ($Settings.PSObject.Properties['keybindings']) {
+        $kept = @()
+        foreach ($binding in @($Settings.keybindings)) {
+            if ($binding.PSObject.Properties['id'] -and $binding.id -in $managedIds) { continue }
+            $keys = @($binding.keys | Where-Object {
+                -not (($binding.PSObject.Properties['id'] -and $null -eq $binding.id -and $_ -in @('ctrl+shift+p','ctrl+shift+f')) -or
+                    ($binding.PSObject.Properties['id'] -and $binding.id -eq 'Terminal.ClosePane' -and $_ -eq 'ctrl+w'))
+            })
+            if ($keys.Count) { $binding.keys = if ($keys.Count -eq 1) {$keys[0]} else {$keys}; $kept += $binding }
+        }
+        $Settings.keybindings = @($kept)
+    }
+    return $Settings
+}
+
+function Get-WslConnectionArguments([string]$Distro,[string]$WslUser) {
+    # This WSL build treats unnecessary quotes around simple distro/user names
+    # literally. Keep those tokens plain; quote only a name containing whitespace.
+    $distroToken = if ($Distro -match '\s') {'"'+$Distro+'"'} else {$Distro}
+    $userToken = if ($WslUser -match '\s') {'"'+$WslUser+'"'} else {$WslUser}
+    return ('-d '+$distroToken+' -u '+$userToken)
+}
+function New-WslCommandLine([string]$Distro,[string]$WslUser,[string]$WslHome) {
+    return ((Join-Path $env:WINDIR 'System32\wsl.exe')+' '+(Get-WslConnectionArguments $Distro $WslUser)+' --cd ~ -- "'+$WslHome+'/.local/bin/WSL Terminal"')
+}

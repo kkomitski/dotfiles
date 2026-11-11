@@ -1,8 +1,16 @@
-# WSL Terminal
+# Windows Shell and WSL Terminal
 
-Windows Terminal launches the Linux toolchain inside WSL, with Mac-position
-keyboard remaps, the shared prompt/editor/file manager, and a separate
-**WSL Terminal** application shortcut. WezTerm is not required on Windows.
+Two separate executables and Start-menu apps use independent portable Windows
+Terminal runtimes and settings:
+
+| App | Shell | New tabs | Icon |
+| --- | --- | --- | --- |
+| **Windows Shell.exe** | Windows PowerShell | Windows PowerShell | PowerShell |
+| **WSL Terminal.exe** | WSL Zsh with tmux | New independent tmux sessions | macOS Terminal |
+
+The WSL app includes the Mac-position keyboard remaps and shared prompt/editor/
+file-manager setup. Its tmux bindings do not affect Windows Shell. WezTerm is
+not required. Both apps can run at the same time and be pinned separately.
 
 ## Install on another Windows machine
 
@@ -15,7 +23,9 @@ cd "$HOME/.local/share/dotfiles"
 ./windows/install.sh --install-dependencies
 ```
 
-The dependency option installs missing Windows Terminal, PowerToys and AutoHotkey
+The installer downloads a checksum-verified Microsoft portable terminal runtime
+(pinned in `terminal/runtime.json`, currently x64). The dependency option also
+installs missing standard Windows Terminal, PowerToys and AutoHotkey
 v2 through winget. It installs the WSL shell/tmux prerequisites through apt,
 then current Zsh/tmux, ripgrep, the command-line tools and Zsh integrations
 through Linuxbrew as needed.
@@ -40,21 +50,28 @@ pass `-FontDirectory` to `Install.ps1` with a directory containing its TTF files
 
 - WSL links for the shared Zsh, tmux, Starship, Neovim and Yazi configuration,
   plus the WSL editing module, environment setup and clipboard helpers.
-- Windows Terminal profile, matching WezTerm color palette, font registration,
-  actions, and WSL as the default profile for new tabs.
+- Private WSL Terminal settings, matching WezTerm color palette, font registration,
+  actions, and WSL as the default profile inside that app. Windows Shell has its
+  own settings and defaults to PowerShell.
 - PowerToys keyboard maps and the existing AHK navigation, deletion, screenshot,
   Chrome-tab and UK punctuation bindings. Both run at login as the current user.
 - `%LOCALAPPDATA%\Programs\WSL Terminal\WSL Terminal.exe`, compiled locally from
-  the included C# source, with the embedded macOS Terminal icon.
-- Start-menu **WSL Terminal** shortcut with its own app identity. Pin this entry
-  to Start/taskbar or launch it by name; the standard Windows Terminal remains
-  installed. Windows search/Raycast may need a refresh to index the new entry.
+  the included C# source, with the embedded macOS Terminal icon. A second build
+  lives at `%LOCALAPPDATA%\Programs\Windows Shell\Windows Shell.exe` with the
+  embedded PowerShell icon. Each app has its own `runtime\settings\settings.json`.
+- Start-menu **WSL Terminal** and **Windows Shell** shortcuts, each with its own
+  app identity. Pin or launch them by name. Windows search/Raycast may need a
+  refresh to index new entries. The standard Store Terminal remains installed;
+  migration removes the old WSL overrides from it and restores its native default.
 
-The launcher opens a new WSL tab in its named Windows Terminal window. Each tab
+The WSL launcher opens a new WSL tab in its own named window. Each WSL tab
 creates a **new tmux session**, rather than attaching every terminal to `main`.
 Closing a tab detaches its tmux client; use `tmux ls` and `tmux attach -t NAME`
 to recover a session. Exit the shell or kill a session when finished with it.
-The small identity helper runs while its windows exist; it is not a service.
+Each app has a small identity helper that runs while its windows exist; these
+are not services. The Windows Shell launcher opens its own named PowerShell
+window. Its plus button and new-tab shortcuts stay in Windows. Cmd+T opens a
+new native tab there; WSL keeps Cmd+T as the tmux prefix.
 
 ## Keyboard behavior
 
@@ -90,9 +107,10 @@ Windows' original keyboard behavior.
 
 ## Scope, backups and recovery
 
-Windows Terminal actions/default profile are application-wide; PowerToys/AHK
-remaps apply across Windows. The dedicated AHK shell-deletion behavior checks
-the WSL Terminal window title. WSL-specific shell/editor changes are guarded;
+Actions and defaults belong to each app's private configuration. Changing WSL
+Terminal no longer changes Windows Shell or the standard Store Terminal.
+PowerToys/AHK remaps still apply across Windows. The dedicated AHK shell-deletion
+behavior checks the WSL Terminal window title. WSL-specific shell/editor changes are guarded;
 shared `.wezterm.lua` is unchanged, and native Linux/macOS keep existing behavior.
 The current Windows Terminal appearance is retained, including platform tab UI,
 padding and rendering differences from WezTerm.
@@ -107,14 +125,25 @@ merge any additional personal AHK changes into the repository before reinstallin
 
 To undo, restore the relevant backed-up settings/files, remove these WSL links,
 and remove the WSL Terminal Start/startup shortcuts and its local Programs/assets
-folders. Stop its helper/AHK instance first. Do not uninstall shared Windows
-Terminal, PowerToys, or fonts if other workflows use them. Existing terminals,
+folders for both apps. Stop their helpers/AHK instance first. Do not uninstall
+shared Windows Terminal, PowerToys, or fonts if other workflows use them. Existing terminals,
 repositories and tmux sessions are not deleted by installation.
 
 Application logs, compiler output, icon assets and the machine-specific install
-manifest live under `%LOCALAPPDATA%\WSL Terminal`. No credentials or personal
-app settings are exported. VS Code, Java/SDKMAN and other project-specific tools
+manifest live under `%LOCALAPPDATA%\WSL Terminal`; Windows Shell keeps its
+launcher logs/icon assets under `%LOCALAPPDATA%\Windows Shell`. No credentials
+or personal app settings are exported. VS Code, Java/SDKMAN and other project-specific tools
 remain separately managed; Yazi uses `code --wait` when available.
+
+Portable runtimes do not receive Store auto-updates. To update, change the pinned
+version/URL/checksum in `terminal/runtime.json`, close these app windows, and rerun
+the installer. An update refuses to overwrite a runtime that is in use. Normal
+repeat installation does not close any terminal or tmux session. Existing windows
+from the former shared setup keep their sessions; open the two named apps for
+the new separation.
+
+Microsoft documents the settings isolation in
+[Windows Terminal portable mode](https://learn.microsoft.com/en-us/windows/terminal/distributions#windows-terminal-portable).
 
 ## Verification
 
@@ -125,5 +154,8 @@ python3 -m unittest discover -s windows/tests -v
 Tests use disposable PTYs and an isolated tmux server; they do not attach to your
 sessions. Local Unix-socket access is required. In Windows PowerShell, run
 `windows/tests/Test-Configuration.ps1` for merge/backup tests and
-`windows/tests/Test-Installation.ps1` after installation for installed-state checks.
+`windows/tests/Test-Installation.ps1` after installation for installed-state checks,
+including a real WSL connection probe. `windows/tests/Test-ShellWindows.ps1`
+checks live native/WSL shell processes plus window identities/icons. Open both apps
+first, or pass `-Launch` to open them as part of that check.
 See [AUDIT.md](AUDIT.md) for the resolved parity gaps and remaining platform limits.

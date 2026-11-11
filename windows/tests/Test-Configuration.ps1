@@ -16,6 +16,8 @@ try {
  "keybindings":[{"id":"Other.Action","keys":["ctrl+t","ctrl+alt+9"]}],
 }
 '@)
+    $command = New-WslCommandLine 'Ubuntu' 'linux-user' '/home/linux-user'
+    if ($command -notlike '*-d Ubuntu -u linux-user --cd ~ -- "/home/linux-user/.local/bin/WSL Terminal"') { throw 'WSL distro/user argument quoting regressed' }
     $settings = Read-JsonFile $fixture
     $terminalProfile = Read-JsonFile (Join-Path $root 'terminal\profile.json')
     $scheme = Read-JsonFile (Join-Path $root 'terminal\scheme.json')
@@ -30,6 +32,14 @@ try {
     if (-not ($second.keybindings|Where-Object {$_.keys -eq 'ctrl+alt+9'})) { throw 'Unrelated shortcut alias was removed' }
     if (@($second.keybindings|Where-Object {$_.keys -eq 'ctrl+t'}).Count -ne 1) { throw 'Duplicate managed keybinding' }
     if ($second.defaultProfile -ne $terminalProfile.guid) { throw 'New tabs do not default to WSL' }
+    $migrated = Remove-LegacyWslSettings ($json|ConvertFrom-Json) $terminalProfile $actions
+    if ($migrated.defaultProfile -eq $terminalProfile.guid) { throw 'Legacy Terminal still defaults to WSL' }
+    if (@($migrated.profiles.list|Where-Object {$_.guid -eq $terminalProfile.guid}).Count) { throw 'Legacy WSL profile was not migrated' }
+    if (-not ($migrated.profiles.list|Where-Object {$_.guid -eq 'other'})) { throw 'Migration removed unrelated profile' }
+    if (-not ($migrated.keybindings|Where-Object {$_.keys -eq 'ctrl+alt+9'})) { throw 'Migration removed unrelated shortcut' }
+    if (@($migrated.actions|Where-Object {$_.id -eq 'User.TmuxPrefix'}).Count) { throw 'WSL actions remain in native app' }
+    $once=$migrated|ConvertTo-Json -Depth 100
+    if (((Remove-LegacyWslSettings ($once|ConvertFrom-Json) $terminalProfile $actions)|ConvertTo-Json -Depth 100) -ne $once) { throw 'Legacy migration is not idempotent' }
     $keyboard = Read-JsonFile (Join-Path $root 'powertoys\keyboard.json')
     $old = '{"remapKeys":{"inProcess":[{"originalKeys":"999","newRemapKeys":"998"}]}}'|ConvertFrom-Json
     $merged = Merge-PowerToysKeyboard $old $keyboard
@@ -41,5 +51,5 @@ try {
     $count = @(Get-ChildItem $backup -File).Count
     Save-BackedUpFile $fixture $json $backup
     if (@(Get-ChildItem $backup -File).Count -ne $count) { throw 'Unchanged settings created unnecessary backups' }
-    Write-Output 'PASS: JSONC parsing, unrelated-profile preservation, shortcut alias preservation, WSL default, idempotent Terminal/PowerToys merges, and backup behavior.'
+    Write-Output 'PASS: JSONC parsing, unrelated-profile preservation, shortcut alias preservation, WSL default, idempotent Terminal/PowerToys merges, backup behavior, and legacy-app migration.'
 } finally { Remove-Item -LiteralPath $temporary -Recurse -Force }
