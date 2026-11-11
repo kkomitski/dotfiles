@@ -23,3 +23,9 @@ Public
 .wallaby
 .CFUserTextEncoding
 .dotfiles
+
+# Local terminal experiment backups
+/.wezterm.lua*.bak
+
+# Python verification artifacts
+__pycache__/

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "User.TmuxPrefix",
+    "name": "Send tmux prefix",
+    "command": {
+      "action": "sendInput",
+      "input": "\u0002"
+    }
+  },
+  {
+    "id": "User.OpenYazi",
+    "name": "Open Yazi through tmux",
+    "command": {
+      "action": "sendInput",
+      "input": "\u0002b"
+    }
+  },
+  {
+    "id": "User.WslNewTab",
+    "name": "New WSL tab",
+    "command": {
+      "action": "newTab",
+      "profile": "{954a9562-64a0-44fa-9044-f18c1ad1725c}"
+    }
+  },
+  {
+    "id": "User.TmuxPane1",
+    "name": "Select tmux pane 1",
+    "command": {
+      "action": "sendInput",
+      "input": "\u00021"
+    }
+  },
+  {
+    "id": "User.TmuxPane2",
+    "name": "Select tmux pane 2",
+    "command": {
+      "action": "sendInput",
+      "input": "\u00022"
+    }
+  },
+  {
+    "id": "User.TmuxPane3",
+    "name": "Select tmux pane 3",
+    "command": {
+      "action": "sendInput",
+      "input": "\u00023"
+    }
+  },
+  {
+    "id": "User.TmuxPane4",
+    "name": "Select tmux pane 4",
+    "command": {
+      "action": "sendInput",
+      "input": "\u00024"
+    }
+  },
+  {
+    "id": "User.TmuxPane5",
+    "name": "Select tmux pane 5",
+    "command": {
+      "action": "sendInput",
+      "input": "\u00025"
+    }
+  },
+  {
+    "id": "User.TerminalPalette",
+    "command": "commandPalette"
+  },
+  {
+    "id": "User.TerminalFind",
+    "command": "find"
+  }
+]

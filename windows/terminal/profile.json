@@ -1,0 +1,16 @@
+{
+  "guid": "{954a9562-64a0-44fa-9044-f18c1ad1725c}",
+  "name": "WSL Terminal",
+  "hidden": false,
+  "tabTitle": "WSL Terminal",
+  "suppressApplicationTitle": true,
+  "font": {
+    "face": "JetBrainsMonoNL NF",
+    "size": 13
+  },
+  "background": "#1e1e2e",
+  "foreground": "#cdd6f4",
+  "cursorColor": "#f5e0dc",
+  "selectionBackground": "#45475a",
+  "colorScheme": "WSL Terminal"
+}

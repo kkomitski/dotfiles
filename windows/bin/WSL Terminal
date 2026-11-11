@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+export PATH="$HOME/.local/bin:$PATH"
+if [ -x "$HOME/.local/bin/zsh" ]; then
+  export SHELL="$HOME/.local/bin/zsh"
+else
+  export SHELL="$(command -v zsh)"
+fi
+# Each Terminal tab gets a separate tmux session, as in the original WezTerm setup.
+exec tmux new-session "$@"

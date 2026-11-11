@@ -387,3 +387,15 @@ end), { desc = "Open test output" })
 map("n", "<leader>gg", run "Git", { desc = "Git status" })
 map("n", "<leader>gd", run "DiffviewOpen", { desc = "Open Git diff view" })
 map("n", "<leader>gh", run "DiffviewFileHistory", { desc = "Open Git file history" })
+
+-- PowerToys' Cmd-position key arrives as Ctrl on Windows. Keep the native
+-- macOS/Linux mappings above and provide the expected editing actions on WSL.
+if vim.fn.has "wsl" == 1 then
+  map(all_modes, "<C-a>", select_all, { desc = "Select all" })
+  map("v", "<C-c>", '"+y', { desc = "Copy selection" })
+  map("v", "<C-x>", '"+d', { desc = "Cut selection" })
+  map({ "n", "i" }, "<C-z>", undo, { desc = "Undo" })
+  map({ "n", "i" }, "<C-S-z>", redo, { desc = "Redo" })
+  map("i", "<M-BS>", "<C-w>", { desc = "Delete previous word" })
+  map("n", "<C-q>", "<C-v>", { desc = "Block selection (Ctrl+V is terminal paste)" })
+end

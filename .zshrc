@@ -95,6 +95,11 @@ bindkey '^[OF' end-of-line
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 
+# Optional machine-local WSL navigation; native Linux/macOS keep their bindings.
+if [[ -n "${WSL_DISTRO_NAME:-}" && -r "$HOME/.config/zsh/WSL Terminal.zsh" ]]; then
+  source "$HOME/.config/zsh/WSL Terminal.zsh"
+fi
+
 ZSH_AUTOSUGGEST_STRATEGY=(history)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "Terminal.CopyToClipboard",
+    "keys": "ctrl+c"
+  },
+  {
+    "id": "Terminal.PasteFromClipboard",
+    "keys": "ctrl+v"
+  },
+  {
+    "id": "Terminal.DuplicatePaneAuto",
+    "keys": "alt+shift+d"
+  },
+  {
+    "id": "User.TmuxPrefix",
+    "keys": "ctrl+t"
+  },
+  {
+    "id": "User.OpenYazi",
+    "keys": "ctrl+b"
+  },
+  {
+    "keys": "alt+t",
+    "id": "User.WslNewTab"
+  },
+  {
+    "keys": "ctrl+shift+t",
+    "id": "User.WslNewTab"
+  },
+  {
+    "keys": "ctrl+w",
+    "id": "Terminal.ClosePane"
+  },
+  {
+    "keys": "ctrl+shift+p",
+    "id": null
+  },
+  {
+    "keys": "ctrl+shift+f",
+    "id": null
+  },
+  {
+    "keys": "ctrl+alt+shift+p",
+    "id": "User.TerminalPalette"
+  },
+  {
+    "keys": "ctrl+alt+shift+f",
+    "id": "User.TerminalFind"
+  },
+  {
+    "keys": "ctrl+1",
+    "id": "User.TmuxPane1"
+  },
+  {
+    "keys": "ctrl+2",
+    "id": "User.TmuxPane2"
+  },
+  {
+    "keys": "ctrl+3",
+    "id": "User.TmuxPane3"
+  },
+  {
+    "keys": "ctrl+4",
+    "id": "User.TmuxPane4"
+  },
+  {
+    "keys": "ctrl+5",
+    "id": "User.TmuxPane5"
+  }
+]
