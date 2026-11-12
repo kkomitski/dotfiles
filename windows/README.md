@@ -119,6 +119,16 @@ toggles the sidebar, Cmd+P opens files, Cmd+Shift+P opens commands, and the usua
 find/save/select/copy/cut/paste/undo/redo shortcuts work. Existing custom split
 and numbered-editor shortcuts are retained. As elsewhere, the remapped Cmd key
 and physical Ctrl both reach VS Code as Ctrl and cannot be distinguished there.
+Cmd+Shift+[ / ] cycles left/right through tabs in the current editor group, using
+physical bracket-key bindings to avoid UK punctuation/layout ambiguity. The
+Chrome-only AHK tab shortcuts do not apply to VS Code. Navigation rules match
+the actual PowerToys outputs: Option+Left/Right arrives as Ctrl+Left/Right for
+word movement; Cmd+Left/Right arrives as Home/End for line boundaries; Cmd+Up/Down
+arrives as Ctrl+Home/End for document boundaries. Adding Shift selects text at the
+same granularity. Option+Backspace's Ctrl+Backspace transport deletes a word.
+These rules override older VS Code bindings that treated those transports as line
+movement/deletion. AHK punctuation, screenshot and Chrome bindings are unchanged.
+
 Changes normally reload automatically; use **Developer: Reload Window** if needed.
 
 ## Scope, backups and recovery

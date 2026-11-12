@@ -88,5 +88,80 @@
     "key": "ctrl+shift+t",
     "command": "workbench.action.reopenClosedEditor",
     "when": "isWindows"
+  },
+  {
+    "key": "ctrl+shift+[BracketLeft]",
+    "command": "workbench.action.previousEditorInGroup",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+shift+[BracketRight]",
+    "command": "workbench.action.nextEditorInGroup",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+left",
+    "command": "cursorWordLeft",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+right",
+    "command": "cursorWordRight",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+left",
+    "command": "cursorWordLeftSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+right",
+    "command": "cursorWordRightSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "home",
+    "command": "cursorHome",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "end",
+    "command": "cursorEnd",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "shift+home",
+    "command": "cursorHomeSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "shift+end",
+    "command": "cursorEndSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+home",
+    "command": "cursorTop",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+end",
+    "command": "cursorBottom",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+home",
+    "command": "cursorTopSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+end",
+    "command": "cursorBottomSelect",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+backspace",
+    "command": "deleteWordLeft",
+    "when": "isWindows && editorTextFocus && !editorReadonly"
   }
 ]
