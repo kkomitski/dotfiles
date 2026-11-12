@@ -52,22 +52,32 @@ if [[ -o interactive ]]; then
 autoload -Uz compinit
 compinit
 
-if [[ -n "$HOMEBREW_PREFIX" ]]; then
-  [[ -r "$HOMEBREW_PREFIX/opt/zsh-autosuggestions/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] &&
-    source "$HOMEBREW_PREFIX/opt/zsh-autosuggestions/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-  [[ -r "$HOMEBREW_PREFIX/opt/zsh-history-substring-search/share/zsh-history-substring-search/zsh-history-substring-search.zsh" ]] &&
-    source "$HOMEBREW_PREFIX/opt/zsh-history-substring-search/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
-  [[ -r "$HOMEBREW_PREFIX/opt/zsh-autopair/share/zsh-autopair/autopair.zsh" ]] &&
-    source "$HOMEBREW_PREFIX/opt/zsh-autopair/share/zsh-autopair/autopair.zsh"
-
-  if [[ -r "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh" ]]; then
-    source "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh"
-    source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+# WSL may have user-local plugins from before Linuxbrew was installed. Resolve
+# each plugin independently so a partial Brew installation does not hide them.
+_dotfiles_zsh_plugin_path() {
+  local relative="$1" root
+  local -a roots=("${HOMEBREW_PREFIX:-}")
+  [[ -n ${WSL_DISTRO_NAME:-} ]] && roots+=("$HOME/.local")
+  for root in "${roots[@]}"; do
+    if [[ -n "$root" && -r "$root/opt/$relative" ]]; then
+      print -r -- "$root/opt/$relative"
+      return 0
+    fi
+  done
+  return 1
+}
+# Source at file scope: plugins may declare variables that must survive startup.
+for _zsh_plugin_relative in \
+  zsh-autosuggestions/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+  zsh-history-substring-search/share/zsh-history-substring-search/zsh-history-substring-search.zsh \
+  zsh-autopair/share/zsh-autopair/autopair.zsh \
+  fzf/shell/completion.zsh \
+  fzf/shell/key-bindings.zsh \
+  fzf-tab/share/fzf-tab/fzf-tab.zsh; do
+  if _zsh_plugin_file="$(_dotfiles_zsh_plugin_path "$_zsh_plugin_relative")"; then
+    source "$_zsh_plugin_file"
   fi
-
-  [[ -r "$HOMEBREW_PREFIX/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh" ]] &&
-    source "$HOMEBREW_PREFIX/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh"
-fi
+done
 
 if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
@@ -114,9 +124,11 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --level=2 --color=always
 if (( $+commands[starship] )); then
   eval "$(starship init zsh)"
 fi
-if [[ -n "$HOMEBREW_PREFIX" ]] && [[ -r "$HOMEBREW_PREFIX/opt/zsh-syntax-highlighting/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$HOMEBREW_PREFIX/opt/zsh-syntax-highlighting/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if _zsh_plugin_file="$(_dotfiles_zsh_plugin_path zsh-syntax-highlighting/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh)"; then
+  source "$_zsh_plugin_file"
 fi
+unfunction _dotfiles_zsh_plugin_path
+unset _zsh_plugin_file _zsh_plugin_relative
 fi
 
 # Return to the directory selected in Yazi when it exits.

@@ -87,6 +87,30 @@ class NavigationTests(unittest.TestCase):
         mark, cursor, active = map(int, self.state.read_text().split())
         return actual, actual[min(mark, cursor):max(mark, cursor)], active
 
+    def test_highlighting_after_full_startup(self):
+        ready = self.root / 'full-startup-ready'
+        colors = self.root / 'syntax-colors'
+        probe = (
+            'source "$HOME/.zshrc"; '
+            'probe_colors() { '
+            'BUFFER="__dotfiles_unknown_command__"; CURSOR=${#BUFFER}; _zsh_highlight; '
+            'print -r -- "invalid:${(j:;:)region_highlight}" > ' + shlex.quote(str(colors)) + '; '
+            'BUFFER="echo valid"; CURSOR=${#BUFFER}; _zsh_highlight; '
+            'print -r -- "valid:${(j:;:)region_highlight}" >> ' + shlex.quote(str(colors)) + '; '
+            'print -r -- "autosuggest:${+functions[_zsh_autosuggest_start]}" >> ' + shlex.quote(str(colors)) + '; '
+            'BUFFER=""; zle accept-line; }; '
+            'zle -N probe_colors; bindkey "^]" probe_colors; touch ' + shlex.quote(str(ready)) + '\n'
+        )
+        self.send(probe)
+        self.wait_file(ready)
+        self.read_for(.1)
+        self.send('\x1d')
+        self.wait_file(colors)
+        output = colors.read_text()
+        self.assertRegex(output, r'invalid:.*fg=red')
+        self.assertRegex(output, r'valid:.*fg=green')
+        self.assertIn('autosuggest:1', output)
+
     def test_line_selection_left(self):
         self.assertEqual(self.edit('\x1b[1;2H'), ('alpha beta gamma', 'alpha beta gamma', 1))
 

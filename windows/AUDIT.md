@@ -24,8 +24,10 @@ Native Linux/macOS use their existing bindings; `.wezterm.lua` is unchanged.
 
 ## Validation performed
 
-- 18 automated PTY/tmux tests passed, covering selection, replacement, paste,
+- 19 automated PTY/tmux tests passed, covering selection, replacement, paste,
   Unicode copy/cut, deletion status, Ctrl+C, Ctrl+S, independent sessions and panes.
+  Full startup also verifies actual command syntax colors and autosuggestion loading.
+  WSL falls back to local plugins when a partial Linuxbrew install lacks them.
 - Native PowerShell configuration tests passed: JSONC parsing, unrelated profile
   and shortcut-alias preservation, repeat merges, PowerToys remap preservation,
   and backup behavior.

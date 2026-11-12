@@ -73,6 +73,11 @@ are not services. The Windows Shell launcher opens its own named PowerShell
 window. Its plus button and new-tab shortcuts stay in Windows. Cmd+T opens a
 new native tab there; WSL keeps Cmd+T as the tmux prefix.
 
+Zsh resolves each plugin from Homebrew first, then from `~/.local/opt` on WSL.
+A partial/new Linuxbrew installation therefore does not hide existing local
+syntax highlighting, autosuggestions or completion plugins. To reload an
+existing shell after an update, run `source ~/.zshrc` or open a new tab.
+
 ## Keyboard behavior
 
 Here **Cmd** means physical left Alt; **Option** means physical left Win.
