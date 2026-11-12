@@ -105,6 +105,22 @@ their own selection/editing conventions. This does not turn every TUI into a
 macOS text field. Secure/UAC screens and apps running as another user may retain
 Windows' original keyboard behavior.
 
+## VS Code shortcuts
+
+When VS Code's Windows user directory exists, the installer merges
+`vscode/keybindings.json` into its default keyboard shortcuts. Profiles that
+inherit default shortcuts (including the Java profile on this machine) use these
+rules. Custom shortcuts are preserved, with backups before changes. The rules
+are guarded by `isWindows`, so syncing them does not change macOS/Linux behavior.
+
+VSCodeVim remains enabled. User rules give standard editor/workbench actions
+priority over Vim's Ctrl bindings: Cmd-position+W closes the editor tab, Cmd+B
+toggles the sidebar, Cmd+P opens files, Cmd+Shift+P opens commands, and the usual
+find/save/select/copy/cut/paste/undo/redo shortcuts work. Existing custom split
+and numbered-editor shortcuts are retained. As elsewhere, the remapped Cmd key
+and physical Ctrl both reach VS Code as Ctrl and cannot be distinguished there.
+Changes normally reload automatically; use **Developer: Reload Window** if needed.
+
 ## Scope, backups and recovery
 
 Actions and defaults belong to each app's private configuration. Changing WSL

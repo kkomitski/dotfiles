@@ -46,10 +46,20 @@ try {
     if (-not ($merged.remapKeys.inProcess|Where-Object {$_.originalKeys -eq '999'})) { throw 'Unrelated PowerToys remap was lost' }
     $before=$merged|ConvertTo-Json -Depth 100
     if (((Merge-PowerToysKeyboard ($before|ConvertFrom-Json) $keyboard)|ConvertTo-Json -Depth 100) -ne $before) { throw 'PowerToys merge is not idempotent' }
+    $vscode = @(Read-JsonFile (Join-Path $root 'vscode\keybindings.json'))
+    if (@($vscode|Where-Object {$_.when -notmatch '^isWindows(?:$| && )'}).Count) { throw 'VS Code preset changes non-Windows shortcuts' }
+    $originalCode = @(@{key='ctrl+w';command='keep.other.context';when='terminalFocus'},@{key='ctrl+t';command='keep.split'})
+    $code = @(Merge-VscodeBindings $originalCode $vscode)
+    if (@($code|Where-Object {$_.command -eq 'keep.other.context' -or $_.command -eq 'keep.split'}).Count -ne 2) { throw 'VS Code preset removed unrelated custom bindings' }
+    foreach ($key in @('ctrl+w','ctrl+b')) {
+        if (@($code|Where-Object {$_.key -eq $key})[-1].when -ne 'isWindows') { throw 'Windows shortcut precedence failed' }
+    }
+    $serializedCode = $code|ConvertTo-Json -Depth 100
+    if (((@(Merge-VscodeBindings ($serializedCode|ConvertFrom-Json) $vscode))|ConvertTo-Json -Depth 100) -ne $serializedCode) { throw 'VS Code binding merge is not idempotent' }
     $backup = Join-Path $temporary 'backups'
     Save-BackedUpFile $fixture $json $backup
     $count = @(Get-ChildItem $backup -File).Count
     Save-BackedUpFile $fixture $json $backup
     if (@(Get-ChildItem $backup -File).Count -ne $count) { throw 'Unchanged settings created unnecessary backups' }
-    Write-Output 'PASS: JSONC parsing, unrelated-profile preservation, shortcut alias preservation, WSL default, idempotent Terminal/PowerToys merges, backup behavior, and legacy-app migration.'
+    Write-Output 'PASS: JSONC parsing, unrelated-profile preservation, shortcut alias preservation, WSL default, idempotent Terminal/PowerToys merges, backup behavior, legacy-app migration, and Windows-only VS Code shortcut merges.'
 } finally { Remove-Item -LiteralPath $temporary -Recurse -Force }

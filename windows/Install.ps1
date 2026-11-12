@@ -218,6 +218,16 @@ if (-not $NoStart) {
         }
     }
 }
+# Profiles configured to use default keyboard shortcuts inherit this Windows-only
+# preset. User bindings outrank extension defaults, including VSCodeVim Ctrl keys.
+$codeUser = Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Code\User'
+if (Test-Path -LiteralPath $codeUser) {
+    $keybindingsPath = Join-Path $codeUser 'keybindings.json'
+    $existingCodeBindings = if (Test-Path $keybindingsPath) { @(Read-JsonFile $keybindingsPath) } else { @() }
+    $desiredCodeBindings = @(Read-JsonFile (Join-Path $PSScriptRoot 'vscode\keybindings.json'))
+    $codeBindings = @(Merge-VscodeBindings $existingCodeBindings $desiredCodeBindings)
+    Save-BackedUpFile $keybindingsPath ($codeBindings | ConvertTo-Json -Depth 100) $backups
+}
 $manifest = [pscustomobject]@{layoutVersion=2;windowsLauncher=$windowsExe;windowsSettings=$windowsSettingsPath;legacySettings=$legacySettingsPath;distro=$Distro;wslUser=$WslUser;wslHome=$WslHome;settings=$settingsPath;launcher=$exe;ahk=$ahkPath;shortcuts=@($shortcutPath,$windowsShortcut);backups=$backups}
 [IO.File]::WriteAllText((Join-Path $assets 'installation.json'),($manifest | ConvertTo-Json -Depth 10))
 Write-Output ('Installed WSL Terminal for '+$Distro+' / '+$WslUser)

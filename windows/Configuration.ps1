@@ -135,3 +135,13 @@ function Get-WslConnectionArguments([string]$Distro,[string]$WslUser) {
 function New-WslCommandLine([string]$Distro,[string]$WslUser,[string]$WslHome) {
     return ((Join-Path $env:WINDIR 'System32\wsl.exe')+' '+(Get-WslConnectionArguments $Distro $WslUser)+' --cd ~ -- "'+$WslHome+'/.local/bin/WSL Terminal"')
 }
+
+function Merge-VscodeBindings($Existing,$Desired) {
+    $retained = @($Existing | Where-Object {
+        $rule = $_
+        -not @($Desired | Where-Object {
+            $_.key -eq $rule.key -and $rule.PSObject.Properties['when'] -and $_.when -eq $rule.when
+        }).Count
+    })
+    return @($retained) + @($Desired)
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "key": "ctrl+w",
+    "command": "workbench.action.closeActiveEditor",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+b",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+p",
+    "command": "workbench.action.quickOpen",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+shift+p",
+    "command": "workbench.action.showCommands",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+f",
+    "command": "actions.find",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+f",
+    "command": "workbench.action.findInFiles",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+s",
+    "command": "workbench.action.files.save",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+shift+s",
+    "command": "workbench.action.files.saveAs",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+a",
+    "command": "editor.action.selectAll",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+c",
+    "command": "editor.action.clipboardCopyAction",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+x",
+    "command": "editor.action.clipboardCutAction",
+    "when": "isWindows && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+v",
+    "command": "editor.action.clipboardPasteAction",
+    "when": "isWindows && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+z",
+    "command": "undo",
+    "when": "isWindows && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+z",
+    "command": "redo",
+    "when": "isWindows && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+d",
+    "command": "editor.action.addSelectionToNextFindMatch",
+    "when": "isWindows && editorTextFocus"
+  },
+  {
+    "key": "ctrl+n",
+    "command": "workbench.action.files.newUntitledFile",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "workbench.action.files.openFile",
+    "when": "isWindows"
+  },
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.reopenClosedEditor",
+    "when": "isWindows"
+  }
+]
